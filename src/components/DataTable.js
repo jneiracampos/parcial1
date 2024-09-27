@@ -1,108 +1,62 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material';
 import RobotDetail from './RobotDetail';
-
-const robotsData = [
-  {
-    id: 1,
-    nombre: 'Pedrito',
-    modelo: 'PR-001',
-    fabricante: 'Robotico Corp',
-    detalle: {
-      año: '2019',
-      capacidad: '1.2 GHz',
-      humor: 'Feliz y servicial, siempre dispuesto a ayudar en la cocina.',
-    },
-  },
-  {
-    id: 2,
-    nombre: 'IronChef',
-    modelo: 'IC-3000',
-    fabricante: 'RoboCocina Inc.',
-    detalle: {
-      año: '2018',
-      capacidad: '2.4 GHz',
-      humor: 'Serio y eficiente, especializado en cocina automatizada.',
-    },
-  },
-  {
-    id: 3,
-    nombre: 'Chispita',
-    modelo: 'LT-007',
-    fabricante: 'SparkBots Ltd',
-    detalle: {
-      año: '2020',
-      capacidad: '1.8 GHz',
-      humor: 'Alegre y juguetón, tiene un comportamiento similar al de un gatito curioso, siempre metiéndose en problemas "eléctricos".',
-    },
-  },
-  {
-    id: 4,
-    nombre: 'SrCalculín',
-    modelo: 'MC-808',
-    fabricante: 'Mathematrix Solutions',
-    detalle: {
-      año: '2017',
-      capacidad: '3.0 GHz',
-      humor: 'Extremadamente lógico, siempre encuentra la solución perfecta a problemas matemáticos.',
-    },
-  },
-  {
-    id: 5,
-    nombre: 'DoctoraBot',
-    modelo: 'HL-9000',
-    fabricante: 'MediTech Industries',
-    detalle: {
-      año: '2016',
-      capacidad: '2.0 GHz',
-      humor: 'Empática y cuidadosa, siempre lista para ayudar a los demás.',
-    },
-  },
-  {
-    id: 6,
-    nombre: 'ZumbaTron',
-    modelo: 'ZT-2025',
-    fabricante: 'DanceTech Co.',
-    detalle: {
-      año: '2021',
-      capacidad: '2.8 GHz',
-      humor: 'Energético y entusiasta, siempre listo para una fiesta de baile.',
-    },
-  },
-];
+import { useTranslation } from 'react-i18next';
 
 const DataTable = () => {
-  const [selectedRobot, setSelectedRobot] = useState(null);
+  const { t } = useTranslation();
+  const [robots, setRobots] = useState([]);
+  const [selectedRobotId, setSelectedRobotId] = useState(null);
+  const [error, setError] = useState(null);
 
-  const handleRowClick = (robot) => {
-    setSelectedRobot(robot);
+  useEffect(() => {
+    const fetchRobots = async () => {
+      try {
+        const response = await fetch('http://localhost:3001/robots');
+        if (!response.ok) {
+          throw new Error('Error al obtener los robots');
+        }
+        const data = await response.json();
+        setRobots(data);
+      } catch (error) {
+        setError(error.message);
+      }
+    };
+
+    fetchRobots();
+  }, []);
+
+  const handleRowClick = (robotId) => {
+    setSelectedRobotId(robotId);
   };
+
+  if (error) return <p>{error}</p>;
 
   return (
     <Box sx={{ display: 'flex', justifyContent: 'space-between', marginTop: '20px' }}>
       {/* Tabla de robots */}
-      <TableContainer component={Paper} sx={{ width: '60%' }}>
+      <TableContainer component={Paper} sx={{ width: '64%' }}>
         <Table sx={{ minWidth: 650 }} aria-label="robots table">
           <TableHead>
-            <TableRow>
-              <TableCell align="center"><strong>ID</strong></TableCell>
-              <TableCell align="center"><strong>Nombre</strong></TableCell>
-              <TableCell align="center"><strong>Modelo</strong></TableCell>
-              <TableCell align="center"><strong>Empresa Fabricante</strong></TableCell>
+            <TableRow sx={{ backgroundColor: 'black' }}>
+              <TableCell align="center" sx={{ color: 'white', fontWeight: 'bold' }}>{t('tableHeaderID')}</TableCell>
+              <TableCell align="center" sx={{ color: 'white', fontWeight: 'bold' }}>{t('tableHeaderName')}</TableCell>
+              <TableCell align="center" sx={{ color: 'white', fontWeight: 'bold' }}>{t('tableHeaderModel')}</TableCell>
+              <TableCell align="center" sx={{ color: 'white', fontWeight: 'bold' }}>{t('tableHeaderManufacturer')}</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {robotsData.map((robot) => (
+            {robots.map((robot) => (
               <TableRow
                 key={robot.id}
                 hover
-                onClick={() => handleRowClick(robot)}
+                onClick={() => handleRowClick(robot.id)}
                 sx={{ cursor: 'pointer' }}
               >
-                <TableCell align="center">{robot.id}</TableCell>
+                <TableCell align="center" sx={{ fontWeight: 'bold' }}>{robot.id}</TableCell>
                 <TableCell align="center">{robot.nombre}</TableCell>
                 <TableCell align="center">{robot.modelo}</TableCell>
-                <TableCell align="center">{robot.fabricante}</TableCell>
+                <TableCell align="center">{robot.empresaFabricante}</TableCell>
               </TableRow>
             ))}
           </TableBody>
@@ -110,7 +64,7 @@ const DataTable = () => {
       </TableContainer>
 
       {/* Detalles del robot seleccionado */}
-      <RobotDetail robot={selectedRobot} />
+      <RobotDetail robotId={selectedRobotId} />
     </Box>
   );
 };

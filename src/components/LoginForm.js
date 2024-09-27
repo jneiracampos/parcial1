@@ -6,21 +6,33 @@ const LoginForm = ({ onLoginSuccess }) => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!validateEmail(email)) {
-      setError('El correo no tiene un formato válido');
-    } else if (password.length < 8) {
-      setError('La contraseña debe tener al menos 8 caracteres');
-    } else {
-      setError('');
-      onLoginSuccess();
-    }
-  };
 
-  const validateEmail = (email) => {
-    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return re.test(String(email).toLowerCase());
+    setError('');
+
+    try {
+      const response = await fetch('http://localhost:3001/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          login: email,
+          password: password,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        onLoginSuccess();
+      } else {
+        setError(data.message || 'Error de autenticación. Revise sus credenciales.');
+      }
+    } catch (err) {
+      setError('Error de red. Intente nuevamente más tarde.');
+    }
   };
 
   return (
@@ -32,32 +44,38 @@ const LoginForm = ({ onLoginSuccess }) => {
       }}
     >
       <Box className="login-box" sx={{ width: '60%', padding: '20px', backgroundColor: 'white', borderRadius: '10px', boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)' }}>
-        <Typography variant="h5" component="h2" gutterBottom>
+        <Typography variant="h5" sx={{ fontWeight: 'bold', textAlign: 'center' }} gutterBottom>
           Inicio de sesión
         </Typography>
 
-        {error && <Typography color="error" gutterBottom>{error}</Typography>}
-
         <form onSubmit={handleSubmit}>
           <Box sx={{ marginBottom: '15px' }}>
+            <Typography variant="body1" sx={{ marginBottom: '5px', fontWeight: 'bold' }}>
+              Nombre de usuario
+            </Typography>
             <TextField
-              label="Nombre de usuario"
+              label=""
               variant="outlined"
               fullWidth
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              sx={{ backgroundColor: '#f0f0f0' }}
             />
           </Box>
           <Box sx={{ marginBottom: '15px' }}>
+            <Typography variant="body1" sx={{ marginBottom: '5px', fontWeight: 'bold' }}>
+              Contraseña
+            </Typography>
             <TextField
-              label="Contraseña"
+              label=""
               variant="outlined"
               fullWidth
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              sx={{ backgroundColor: '#f0f0f0' }}
             />
           </Box>
 
@@ -66,17 +84,27 @@ const LoginForm = ({ onLoginSuccess }) => {
               type="submit"
               variant="contained"
               color="primary"
-              sx={{ width: '48%', backgroundColor: 'blue', color: 'white' }}
+              sx={{ width: '48%', backgroundColor: 'blue', color: 'white', fontWeight: 'bold' }}
             >
               Ingresar
             </Button>
             <Button
               variant="contained"
-              sx={{ width: '48%', backgroundColor: 'red', color: 'black' }}
+              sx={{ width: '48%', backgroundColor: 'red', color: 'black', fontWeight: 'bold' }}
             >
               Cancelar
             </Button>
           </Box>
+
+          {error && (
+            <Typography
+              variant="body2"
+              sx={{ color: 'red', fontWeight: 'bold', textAlign: 'left', marginTop: '15px' }}
+            >
+              {error}
+            </Typography>
+          )}
+
         </form>
       </Box>
     </Box>

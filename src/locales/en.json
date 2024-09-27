@@ -1,0 +1,11 @@
+{
+    "tableHeaderID": "ID",
+    "tableHeaderName": "Name",
+    "tableHeaderModel": "Model",
+    "tableHeaderManufacturer": "Manufacturer",
+    "yearOfManufacture": "Year of Manufacture",
+    "processingCapacity": "Processing Capacity",
+    "additionalFeatures": "Additional Features",
+    "humor": "Humor"
+  }
+  
